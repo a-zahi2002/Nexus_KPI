@@ -17,7 +17,16 @@ export function Reports() {
     faculty: '',
   });
 
-  const faculties = ['Engineering', 'Science', 'Management', 'Medicine', 'Agriculture', 'Arts'];
+  const faculties = [
+    'Faculty of Social Sciences and Languages',
+    'Faculty of Agriculture Sciences',
+    'Faculty of Applied Sciences',
+    'Faculty of Geomatics',
+    'Faculty of Management Studies',
+    'Faculty of Medicine',
+    'Faculty of Computing',
+    'Faculty of Technology',
+  ];
 
   useEffect(() => {
     loadData();
