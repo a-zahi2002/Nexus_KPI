@@ -41,10 +41,10 @@ function AppContent() {
 
   if (loading || dbLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-maroon-600 dark:text-maroon-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading Nexus...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center glass-panel p-8 rounded-2xl">
+          <Loader2 className="w-12 h-12 animate-spin text-maroon-600 dark:text-neon-blue mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-300 font-medium">Loading Nexus...</p>
         </div>
       </div>
     );
@@ -52,17 +52,17 @@ function AppContent() {
 
   if (!dbInitialized) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-8 max-w-2xl">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass-panel rounded-xl p-8 max-w-2xl">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Database Setup Required
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             The database tables have not been set up yet. Please run the SQL migration script in
             your Supabase SQL Editor.
           </p>
-          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-            <code className="text-sm text-gray-100">
+          <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto border border-gray-700">
+            <code className="text-sm text-neon-blue">
               Check the supabase/migrations folder for the SQL script
             </code>
           </div>

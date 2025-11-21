@@ -29,6 +29,16 @@ export default {
           800: '#665600',
           900: '#332b00',
         },
+        neon: {
+          blue: '#00f3ff',
+          purple: '#bc13fe',
+          pink: '#ff00ff',
+        },
+        dark: {
+          bg: '#0a0a0f',
+          surface: '#13131f',
+          border: '#2a2a35',
+        }
       },
     },
   },
