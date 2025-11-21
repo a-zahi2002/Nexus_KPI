@@ -87,4 +87,13 @@ export const userService = {
     if (error) throw error;
     return data;
   },
+
+  async delete(id: string): Promise<{ error: any }> {
+    const { error } = await supabase
+      .from('app_users')
+      .delete()
+      .eq('id', id);
+
+    return { error };
+  },
 };
