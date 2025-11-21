@@ -5,6 +5,7 @@ import { Search, UserPlus, Award, User, X } from 'lucide-react';
 import type { Member, Contribution } from '../types/database';
 import { NewMemberForm } from '../components/NewMemberForm';
 import { AddContributionForm } from '../components/AddContributionForm';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface MembersProps {
   initialSearch?: string;
@@ -19,6 +20,7 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
   const [showNewMemberForm, setShowNewMemberForm] = useState(false);
   const [showAddContribution, setShowAddContribution] = useState(false);
   const [contributions, setContributions] = useState<Contribution[]>([]);
+  const { canEdit } = usePermissions();
 
   useEffect(() => {
     if (initialSearch) {
@@ -84,6 +86,13 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           Search for members by Registration Number
         </p>
+        {!canEdit && (
+          <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>Viewer Mode:</strong> You have read-only access. Contact an admin or editor to register members or add contributions.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-200 dark:border-gray-700">
@@ -124,15 +133,17 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
                 Member Not Found
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                No member found with Registration Number "{searchQuery}". Would you like to register this member?
+                No member found with Registration Number "{searchQuery}". {canEdit ? 'Would you like to register this member?' : 'Please contact an admin or editor to register this member.'}
               </p>
-              <button
-                onClick={() => setShowNewMemberForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200"
-              >
-                <UserPlus className="w-5 h-5" />
-                Register New Member
-              </button>
+              {canEdit && (
+                <button
+                  onClick={() => setShowNewMemberForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  Register New Member
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -198,13 +209,15 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
               )}
             </div>
 
-            <button
-              onClick={() => setShowAddContribution(true)}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200"
-            >
-              <Award className="w-5 h-5" />
-              Add Contribution
-            </button>
+            {canEdit && (
+              <button
+                onClick={() => setShowAddContribution(true)}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200"
+              >
+                <Award className="w-5 h-5" />
+                Add Contribution
+              </button>
+            )}
 
             {contributions.length > 0 && (
               <div className="mt-6">
