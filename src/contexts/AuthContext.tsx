@@ -21,13 +21,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
+    setLoading(true);
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
       setUser(authUser);
 
       if (authUser) {
-        const userData = await userService.getCurrentUser();
-        setAppUser(userData);
+        try {
+          const userData = await userService.getCurrentUser();
+          setAppUser(userData);
+        } catch (err) {
+          console.error('Error loading app user details:', err);
+          setAppUser(null);
+        }
       } else {
         setAppUser(null);
       }

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LoginScreen } from './components/LoginScreen';
-import { Layout } from './components/Layout';
+
 import { Navbar } from './components/Navbar';
 import { Dashboard } from './pages/Dashboard';
 import { Members } from './pages/Members';
 import { Reports } from './pages/Reports';
 import { UserManagement } from './pages/UserManagement';
+import { AccountNotFound } from './components/AccountNotFound';
 import { initializeDatabase, seedMockData } from './lib/db-init';
 import { Loader2 } from 'lucide-react';
 
@@ -49,10 +50,6 @@ function AppContent() {
     );
   }
 
-  if (!user || !appUser) {
-    return <LoginScreen />;
-  }
-
   if (!dbInitialized) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex items-center justify-center p-4">
@@ -72,6 +69,14 @@ function AppContent() {
         </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  if (!appUser) {
+    return <AccountNotFound />;
   }
 
   return (
