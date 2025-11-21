@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { memberService } from '../services/member-service';
 import { contributionService } from '../services/contribution-service';
-import { Search, UserPlus, Award, User, X, FileDown } from 'lucide-react';
+import { Search, UserPlus, Award, User, X, FileDown, Pencil } from 'lucide-react';
 import type { Member, Contribution } from '../types/database';
 import { NewMemberForm } from '../components/NewMemberForm';
+import { EditMemberForm } from '../components/EditMemberForm';
 import { AddContributionForm } from '../components/AddContributionForm';
 import { BulkImportModal } from '../components/BulkImportModal';
 import { usePermissions } from '../hooks/usePermissions';
@@ -19,6 +20,7 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
   const [memberNotFound, setMemberNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showNewMemberForm, setShowNewMemberForm] = useState(false);
+  const [showEditMemberForm, setShowEditMemberForm] = useState(false);
   const [showAddContribution, setShowAddContribution] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [contributions, setContributions] = useState<Contribution[]>([]);
@@ -85,6 +87,12 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
     setMemberNotFound(false);
     setSearchQuery(member.reg_no);
     loadMembers(); // Reload list to include new member
+  };
+
+  const handleMemberUpdated = (updatedMember: Member) => {
+    setShowEditMemberForm(false);
+    setSearchResult(updatedMember);
+    loadMembers(); // Reload list to reflect changes
   };
 
   const handleContributionAdded = async () => {
@@ -268,13 +276,22 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
             </div>
 
             {canEdit && (
-              <button
-                onClick={() => setShowAddContribution(true)}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200"
-              >
-                <Award className="w-5 h-5" />
-                Add Contribution
-              </button>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setShowEditMemberForm(true)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors duration-200"
+                >
+                  <Pencil className="w-5 h-5" />
+                  Edit Details
+                </button>
+                <button
+                  onClick={() => setShowAddContribution(true)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  <Award className="w-5 h-5" />
+                  Add Contribution
+                </button>
+              </div>
             )}
 
             {contributions.length > 0 && (
@@ -431,6 +448,14 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {showEditMemberForm && searchResult && (
+        <EditMemberForm
+          member={searchResult}
+          onSuccess={handleMemberUpdated}
+          onCancel={() => setShowEditMemberForm(false)}
+        />
       )}
 
       {showAddContribution && searchResult && (

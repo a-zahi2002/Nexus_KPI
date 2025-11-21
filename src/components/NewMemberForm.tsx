@@ -26,12 +26,14 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const faculties = [
-    'Engineering',
-    'Science',
-    'Management',
-    'Medicine',
-    'Agriculture',
-    'Arts',
+    'Faculty of Social Sciences and Languages',
+    'Faculty of Agriculture Sciences',
+    'Faculty of Applied Sciences',
+    'Faculty of Geomatics',
+    'Faculty of Management Studies',
+    'Faculty of Medicine',
+    'Faculty of Computing',
+    'Faculty of Technology',
   ];
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -15,21 +15,25 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [memberCount, setMemberCount] = useState(0);
+
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
     try {
-      const [members, points, projects] = await Promise.all([
+      const [members, points, projects, count] = await Promise.all([
         memberService.getTopMembers(3),
         contributionService.getTotalPoints(),
-        contributionService.getMonthlyStats(new Date().getFullYear(), new Date().getMonth() + 1)
+        contributionService.getMonthlyStats(new Date().getFullYear(), new Date().getMonth() + 1),
+        memberService.getAll().then(m => m.length)
       ]);
 
       setTopMembers(members);
       setTotalPoints(points);
       setMonthlyProjects(projects);
+      setMemberCount(count);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -118,7 +122,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 Active Members
               </p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                {topMembers.length > 0 ? '3+' : '0'}
+                {memberCount}
               </p>
             </div>
             <div className="w-12 h-12 bg-gold-100 dark:bg-yellow-500/20 rounded-lg flex items-center justify-center">

@@ -29,7 +29,7 @@ export const bulkImportService = {
                 full_name: 'John Doe Smith',
                 name_with_initials: 'J.D. Smith',
                 batch: '2021',
-                faculty: 'Engineering',
+                faculty: 'Faculty of Computing',
                 whatsapp: '+94771234567',
                 my_lci_num: '12345678',
             },
@@ -38,7 +38,7 @@ export const bulkImportService = {
                 full_name: 'Jane Mary Johnson',
                 name_with_initials: 'J.M. Johnson',
                 batch: '2021',
-                faculty: 'Science',
+                faculty: 'Faculty of Applied Sciences',
                 whatsapp: '+94777654321',
                 my_lci_num: '',
             },
@@ -52,7 +52,7 @@ export const bulkImportService = {
             { wch: 25 }, // full_name
             { wch: 20 }, // name_with_initials
             { wch: 10 }, // batch
-            { wch: 20 }, // faculty
+            { wch: 40 }, // faculty
             { wch: 15 }, // whatsapp
             { wch: 15 }, // my_lci_num
         ];
