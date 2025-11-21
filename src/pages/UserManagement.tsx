@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { userService } from '../services/user-service';
 import { memberService } from '../services/member-service';
-import { UserPlus, Shield, Eye, Edit as EditIcon, Loader2, X } from 'lucide-react';
+import { UserPlus, Shield, Eye, EyeOff, Edit as EditIcon, Loader2, X } from 'lucide-react';
 import type { AppUser, Member } from '../types/database';
 
 export function UserManagement() {
@@ -222,6 +222,7 @@ function CreateUserModal({ members, onSuccess, onCancel }: CreateUserModalProps)
     role: 'viewer' as 'super_admin' | 'editor' | 'viewer',
     linkedMemberRegNo: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -239,8 +240,9 @@ function CreateUserModal({ members, onSuccess, onCancel }: CreateUserModalProps)
       });
 
       onSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create user');
+    } catch (err: any) {
+      console.error('Full create user error:', err);
+      setError(err.message || 'Failed to create user. Check console for details.');
     } finally {
       setLoading(false);
     }
@@ -278,15 +280,28 @@ function CreateUserModal({ members, onSuccess, onCancel }: CreateUserModalProps)
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Password <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-              minLength={6}
-              placeholder="Minimum 6 characters"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength={6}
+                placeholder="Minimum 6 characters"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div>
