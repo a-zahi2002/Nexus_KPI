@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, Loader2 } from 'lucide-react';
+import { LogIn, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export function LoginScreen() {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -17,7 +18,13 @@ export function LoginScreen() {
     try {
       await signIn(email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      // Standardize error message for invalid credentials
+      const message = err instanceof Error ? err.message : 'Login failed';
+      if (message.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -59,19 +66,34 @@ export function LoginScreen() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white pr-12"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
