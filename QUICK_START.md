@@ -1,6 +1,6 @@
-# Nexus - Quick Start Guide
+# SabraLeos - Quick Start Guide
 
-Get up and running with Nexus in 5 minutes!
+Get up and running with SabraLeos in 5 minutes!
 
 ## Step 1: Database Setup (2 minutes)
 
@@ -27,7 +27,7 @@ VALUES ('YOUR_COPIED_USER_ID', 'admin', 'System Administrator', 'super_admin');
 
 ## Step 3: Log In (30 seconds)
 
-1. Open the Nexus app
+1. Open the SabraLeos app
 2. Log in with:
    - Email: `admin@example.com`
    - Password: `nexus123`
@@ -58,7 +58,7 @@ VALUES ('YOUR_COPIED_USER_ID', 'admin', 'System Administrator', 'super_admin');
 
 ## Done!
 
-You're now ready to use Nexus! Here's what you can do next:
+You're now ready to use SabraLeos! Here's what you can do next:
 
 ### Immediate Next Steps
 

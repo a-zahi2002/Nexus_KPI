@@ -44,7 +44,7 @@ function AppContent() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center glass-panel p-8 rounded-2xl">
           <Loader2 className="w-12 h-12 animate-spin text-maroon-600 dark:text-neon-blue mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-300 font-medium">Loading Nexus...</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">Loading SabraLeos...</p>
         </div>
       </div>
     );

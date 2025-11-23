@@ -1,4 +1,4 @@
-# Nexus - Leo Club Points Tracker
+# SabraLeos - Leo Club Points Tracker
 
 A production-ready Progressive Web App (PWA) for tracking member contributions and service points for the Leo Club of Sabaragamuwa University.
 
@@ -245,7 +245,7 @@ All database tables use Supabase RLS policies to ensure:
 
 ### Installation
 
-Users can install Nexus as a PWA:
+Users can install SabraLeos as a PWA:
 1. Visit the app in a mobile browser
 2. Tap "Add to Home Screen"
 3. App opens in standalone mode (no browser UI)

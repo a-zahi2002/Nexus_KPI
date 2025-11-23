@@ -1,6 +1,6 @@
-# Nexus Database Setup Guide
+# SabraLeos Database Setup Guide
 
-This guide will help you set up the Supabase database for the Nexus application.
+This guide will help you set up the Supabase database for the SabraLeos application.
 
 ## Prerequisites
 
@@ -263,7 +263,7 @@ Replace `YOUR_USER_ID_HERE` with the actual User ID you copied.
 
 ### Step 4: Test Your Setup
 
-1. Return to the Nexus application
+1. Return to the SabraLeos application
 2. Log in with the email and password you created
 3. You should now have full access as a Super Admin
 

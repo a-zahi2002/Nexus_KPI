@@ -1,6 +1,6 @@
 {
-  "name": "Nexus - Leo Club Points Tracker",
-  "short_name": "Nexus",
+  "name": "SabraLeos - KPI System",
+  "short_name": "SabraLeos",
   "description": "Member Contribution & Points Tracking System for Leo Club of Sabaragamuwa University",
   "start_url": "/",
   "display": "standalone",
@@ -9,13 +9,13 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/images/Round_logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/images/Round_logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

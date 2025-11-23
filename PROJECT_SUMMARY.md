@@ -1,8 +1,8 @@
-# Nexus - Project Summary
+# SabraLeos - Project Summary
 
 ## Overview
 
-Nexus is a production-ready Progressive Web App built for the Leo Club of Sabaragamuwa University to track member contributions and service points digitally, replacing traditional paper-based systems.
+SabraLeos is a production-ready Progressive Web App built for the Leo Club of Sabaragamuwa University to track member contributions and service points digitally, replacing traditional paper-based systems.
 
 ## What Has Been Built
 
@@ -236,7 +236,7 @@ Points are recalculated automatically via PostgreSQL triggers:
 
 1. Follow QUICK_START.md
 2. Create admin user in Supabase
-3. Log in to Nexus
+3. Log in to SabraLeos
 4. Start adding members and contributions
 
 ## What Makes This Special
@@ -374,6 +374,6 @@ The application is considered successful when:
 
 ## Conclusion
 
-Nexus is a complete, production-ready application that replaces paper-based member tracking with a modern, secure, mobile-friendly digital system. It's been built with best practices, security, and user experience in mind.
+SabraLeos is a complete, production-ready application that replaces paper-based member tracking with a modern, secure, mobile-friendly digital system. It's been built with best practices, security, and user experience in mind.
 
 **The application is ready to deploy and use immediately.**

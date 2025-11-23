@@ -47,14 +47,14 @@ export function Navbar({ currentPage = 'dashboard', onNavigate }: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-maroon-600 to-maroon-800 dark:from-maroon-600 dark:to-neon-purple rounded-lg flex items-center justify-center shadow-lg shadow-maroon-500/20">
-                <span className="text-white font-bold text-lg">N</span>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-maroon-500/20 overflow-hidden bg-white">
+                <img src="/images/Round_logo.png" alt="SabraLeos Logo" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                  Nexus
+                  SabraLeos
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Leo Club - SUSL</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">KPI System</p>
               </div>
             </div>
 
