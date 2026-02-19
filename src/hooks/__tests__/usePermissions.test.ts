@@ -13,6 +13,7 @@ const mockUseAuth = vi.mocked(useAuth);
 
 function setRole(role: 'super_admin' | 'editor' | 'viewer' | null) {
     mockUseAuth.mockReturnValue({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         user: role ? { id: 'test-user' } as any : null,
         appUser: role
             ? {

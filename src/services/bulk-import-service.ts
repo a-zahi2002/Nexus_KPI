@@ -5,7 +5,7 @@ import type { MemberInsert } from '../types/database';
 export interface ImportResult {
     success: number;
     failed: number;
-    errors: Array<{ row: number; error: string; data?: any }>;
+    errors: Array<{ row: number; error: string; data?: unknown }>;
 }
 
 export interface MemberImportRow {
@@ -80,7 +80,7 @@ export const bulkImportService = {
                     const jsonData = XLSX.utils.sheet_to_json<MemberImportRow>(worksheet);
 
                     resolve(jsonData);
-                } catch (error) {
+                } catch {
                     reject(new Error('Failed to parse Excel file. Please ensure it matches the template format.'));
                 }
             };
@@ -96,7 +96,8 @@ export const bulkImportService = {
     /**
      * Validate a single member row
      */
-    validateMemberRow(row: any, rowIndex: number): { valid: boolean; errors: string[] } {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    validateMemberRow(row: any): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
         if (!row.reg_no || typeof row.reg_no !== 'string' || row.reg_no.trim() === '') {
@@ -144,7 +145,7 @@ export const bulkImportService = {
             const rowNumber = i + 2; // +2 because Excel is 1-indexed and has a header row
 
             // Validate row
-            const validation = this.validateMemberRow(row, rowNumber);
+            const validation = this.validateMemberRow(row);
             if (!validation.valid) {
                 result.failed++;
                 result.errors.push({

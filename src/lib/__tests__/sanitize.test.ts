@@ -10,7 +10,9 @@ describe('sanitizeSearchQuery', () => {
     });
 
     it('returns empty string for null/undefined', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(sanitizeSearchQuery(null as any)).toBe('');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(sanitizeSearchQuery(undefined as any)).toBe('');
     });
 

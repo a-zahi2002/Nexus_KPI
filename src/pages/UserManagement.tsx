@@ -230,8 +230,8 @@ export function UserManagement() {
                           onClick={() => handleDelete(user.id, user.username, user.role)}
                           disabled={user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1}
                           className={`p-2 rounded-lg transition-colors ${user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1
-                              ? 'text-gray-300 cursor-not-allowed dark:text-gray-600'
-                              : 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20'
+                            ? 'text-gray-300 cursor-not-allowed dark:text-gray-600'
+                            : 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20'
                             }`}
                           title={
                             user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1
@@ -370,8 +370,9 @@ function UserModal({ user, members, onSuccess, onCancel }: UserModalProps) {
       setTimeout(() => {
         onSuccess();
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || `Failed to ${user ? 'update' : 'create'} user`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(message || `Failed to ${user ? 'update' : 'create'} user`);
     } finally {
       setLoading(false);
     }

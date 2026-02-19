@@ -4,7 +4,7 @@ const isDev = import.meta.env.DEV;
 
 export async function initializeDatabase() {
   try {
-    const { data: tables, error: tablesError } = await supabase
+    const { error: tablesError } = await supabase
       .from('members')
       .select('reg_no')
       .limit(1);
@@ -69,6 +69,7 @@ export async function seedMockData() {
 
     const { error: membersError } = await supabase
       .from('members')
+      // @ts-expect-error: Suppress type mismatch for mock data
       .insert(mockMembers);
 
     if (membersError) {

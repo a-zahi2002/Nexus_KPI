@@ -25,7 +25,7 @@ export function BulkImportModal({ onClose, onSuccess }: BulkImportModalProps) {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-excel',
       ];
-      
+
       if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
         alert('Please select a valid Excel file (.xlsx or .xls)');
         return;
@@ -134,7 +134,7 @@ export function BulkImportModal({ onClose, onSuccess }: BulkImportModalProps) {
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
                   After filling the template with member data, upload it here to import the members.
                 </p>
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -143,7 +143,7 @@ export function BulkImportModal({ onClose, onSuccess }: BulkImportModalProps) {
                   className="hidden"
                   id="excel-file-input"
                 />
-                
+
                 <div className="space-y-3">
                   {selectedFile ? (
                     <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
@@ -244,7 +244,8 @@ export function BulkImportModal({ onClose, onSuccess }: BulkImportModalProps) {
                         <p className="text-sm font-medium text-red-800 dark:text-red-300">
                           Row {error.row}: {error.error}
                         </p>
-                        {error.data && (
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        {(error.data as any) && (
                           <p className="text-xs text-red-600 dark:text-red-400 mt-1">
                             {JSON.stringify(error.data)}
                           </p>

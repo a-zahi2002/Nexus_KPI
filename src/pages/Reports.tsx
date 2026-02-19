@@ -28,14 +28,6 @@ export function Reports() {
     'Faculty of Technology',
   ];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [filters, members, contributions]);
-
   const loadData = async () => {
     try {
       const [membersData, contributionsData] = await Promise.all([
@@ -53,7 +45,13 @@ export function Reports() {
     }
   };
 
-  const applyFilters = () => {
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+
+  useEffect(() => {
     let filtered = [...members];
 
     if (filters.faculty) {
@@ -96,7 +94,9 @@ export function Reports() {
     }
 
     setFilteredMembers(filtered);
-  };
+  }, [filters, members, contributions]);
+
+
 
   const exportToCSV = () => {
     const headers = [
