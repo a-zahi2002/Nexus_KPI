@@ -4,6 +4,7 @@ import { memberService } from '../services/member-service';
 import { UserPlus, Shield, Eye, EyeOff, Edit as EditIcon, Loader2, X, Trash2 } from 'lucide-react';
 import type { AppUser, Member } from '../types/database';
 import { usePermissions } from '../hooks/usePermissions';
+import { validatePassword } from '../lib/sanitize';
 
 export function UserManagement() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -228,11 +229,10 @@ export function UserManagement() {
                         <button
                           onClick={() => handleDelete(user.id, user.username, user.role)}
                           disabled={user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1}
-                          className={`p-2 rounded-lg transition-colors ${
-                            user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1
+                          className={`p-2 rounded-lg transition-colors ${user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1
                               ? 'text-gray-300 cursor-not-allowed dark:text-gray-600'
                               : 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20'
-                          }`}
+                            }`}
                           title={
                             user.role === 'super_admin' && users.filter(u => u.role === 'super_admin').length <= 1
                               ? 'Cannot delete the last Super Admin'
@@ -335,6 +335,16 @@ function UserModal({ user, members, onSuccess, onCancel }: UserModalProps) {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
+
+    // Validate password on create
+    if (!user) {
+      const passwordCheck = validatePassword(formData.password);
+      if (!passwordCheck.isValid) {
+        setError('Password requirements: ' + passwordCheck.errors.join(', '));
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -361,7 +371,6 @@ function UserModal({ user, members, onSuccess, onCancel }: UserModalProps) {
         onSuccess();
       }, 2000);
     } catch (err: any) {
-      console.error('User operation error:', err);
       setError(err.message || `Failed to ${user ? 'update' : 'create'} user`);
     } finally {
       setLoading(false);
@@ -411,8 +420,8 @@ function UserModal({ user, members, onSuccess, onCancel }: UserModalProps) {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
-                  minLength={6}
-                  placeholder="Minimum 6 characters"
+                  minLength={8}
+                  placeholder="Min 8 chars, uppercase, number, special"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white pr-10"
                 />
                 <button
@@ -427,6 +436,22 @@ function UserModal({ user, members, onSuccess, onCancel }: UserModalProps) {
                   )}
                 </button>
               </div>
+              {/* Password strength indicator */}
+              {formData.password && (() => {
+                const v = validatePassword(formData.password);
+                const colors = { weak: 'bg-red-500', fair: 'bg-amber-500', strong: 'bg-green-500' };
+                const widths = { weak: 'w-1/3', fair: 'w-2/3', strong: 'w-full' };
+                return (
+                  <div className="mt-2">
+                    <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div className={`h-full ${colors[v.strength]} ${widths[v.strength]} transition-all duration-300 rounded-full`} />
+                    </div>
+                    <p className={`text-xs mt-1 font-medium ${v.isValid ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                      {v.isValid ? `✓ Strong enough (${v.strength})` : v.errors.join(' • ')}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           )}
 

@@ -1,8 +1,10 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useCallback, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import type { AppUser } from '../types/database';
 import { userService } from '../services/user-service';
 import type { User } from '@supabase/supabase-js';
+
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 interface AuthContextType {
   user: User | null;
@@ -61,27 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      console.error('Sign in error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        status: error.status,
-        name: error.name,
-      });
       throw error;
     }
-
-    console.log('Sign in successful:', {
-      userId: data.user?.id,
-      email: data.user?.email,
-      confirmed_at: data.user?.confirmed_at,
-      email_confirmed_at: data.user?.email_confirmed_at,
-    });
 
     await loadUser();
   };
@@ -96,6 +85,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     await loadUser();
   };
+
+  // --- Session idle timeout ---
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    if (user) {
+      idleTimerRef.current = setTimeout(() => {
+        signOut();
+      }, SESSION_TIMEOUT_MS);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach((event) => window.addEventListener(event, resetIdleTimer));
+    resetIdleTimer(); // start timer on mount
+
+    return () => {
+      events.forEach((event) => window.removeEventListener(event, resetIdleTimer));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [user, resetIdleTimer]);
 
   return (
     <AuthContext.Provider value={{ user, appUser, loading, signIn, signOut, refreshUser }}>

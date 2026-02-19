@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { sanitizeSearchQuery } from '../lib/sanitize';
 import type { Member, MemberInsert, MemberUpdate } from '../types/database';
 
 export const memberService = {
@@ -87,10 +88,13 @@ export const memberService = {
   },
 
   async search(query: string): Promise<Member[]> {
+    const sanitized = sanitizeSearchQuery(query);
+    if (!sanitized) return [];
+
     const { data, error } = await supabase
       .from('members')
       .select('*')
-      .or(`reg_no.ilike.%${query}%,full_name.ilike.%${query}%,name_with_initials.ilike.%${query}%`)
+      .or(`reg_no.ilike.%${sanitized}%,full_name.ilike.%${sanitized}%,name_with_initials.ilike.%${sanitized}%`)
       .order('total_points', { ascending: false });
 
     if (error) throw error;
