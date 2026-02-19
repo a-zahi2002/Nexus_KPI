@@ -4,6 +4,8 @@ import { contributionService } from '../services/contribution-service';
 import { Filter, Download, Calendar, Users as UsersIcon, TrendingUp } from 'lucide-react';
 import type { Member, Contribution } from '../types/database';
 import { ExportOptionsModal, type ColumnOption } from '../components/ExportOptionsModal';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export function Reports() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -113,7 +115,7 @@ export function Reports() {
     { key: 'whatsapp', label: 'WhatsApp' },
   ];
 
-  const handleExport = (selectedColumns: string[], includeHeaders: boolean) => {
+  const handleExport = (selectedColumns: string[], includeHeaders: boolean, format: 'csv' | 'pdf') => {
     const memberContributions = new Map<string, number>();
     contributions.forEach((contrib) => {
       const current = memberContributions.get(contrib.member_reg_no) || 0;
@@ -130,19 +132,69 @@ export function Reports() {
       });
     });
 
-    let csvContent = '';
-    if (includeHeaders) {
-      csvContent += headers.join(',') + '\n';
-    }
-    csvContent += rows.map((row) => row.join(',')).join('\n');
+    if (format === 'csv') {
+      let csvContent = '';
+      if (includeHeaders) {
+        csvContent += headers.join(',') + '\n';
+      }
+      csvContent += rows.map((row) => row.join(',')).join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nexus-report-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nexus-report-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } else {
+      // PDF Export
+      const doc = new jsPDF();
+
+      // Add Title
+      doc.setFontSize(18);
+      doc.setTextColor(128, 0, 0); // Maroon color
+      doc.text('Nexus KPI - Member Report', 14, 22);
+
+      // Add Date
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+
+      // Add Filters Info if any
+      let filterText = 'Filters: ';
+      const activeFilters = [];
+      if (filters.faculty) activeFilters.push(`Faculty: ${filters.faculty}`);
+      // if (filters.batch) activeFilters.push(`Batch: ${filters.batch}`); // Assuming batch filter exists in context, though strictly it's not in local state shown
+      // Note: In strict Reports component shown, filters.batch isn't there, but let's stick to what's available
+      if (filters.startDate) activeFilters.push(`Start: ${filters.startDate}`);
+      if (filters.endDate) activeFilters.push(`End: ${filters.endDate}`);
+      if (filters.minProjects) activeFilters.push(`Min Projects: ${filters.minProjects}`);
+
+      if (activeFilters.length > 0) {
+        doc.text(filterText + activeFilters.join(', '), 14, 36);
+      }
+
+      // Generate Table
+      autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: activeFilters.length > 0 ? 42 : 36,
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [128, 0, 0], // Maroon
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+        },
+        alternateRowStyles: {
+          fillColor: [249, 245, 245], // Light maroon tint
+        },
+      });
+
+      doc.save(`nexus-report-${new Date().toISOString().split('T')[0]}.pdf`);
+    }
   };
 
 

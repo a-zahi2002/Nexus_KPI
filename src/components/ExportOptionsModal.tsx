@@ -9,7 +9,7 @@ export interface ColumnOption {
 interface ExportOptionsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onExport: (selectedColumns: string[], includeHeaders: boolean) => void;
+    onExport: (selectedColumns: string[], includeHeaders: boolean, format: 'csv' | 'pdf') => void;
     availableColumns: ColumnOption[];
 }
 
@@ -23,6 +23,7 @@ export function ExportOptionsModal({
         availableColumns.map((col) => col.key)
     );
     const [includeHeaders, setIncludeHeaders] = useState(true);
+    const [format, setFormat] = useState<'csv' | 'pdf'>('csv');
 
     if (!isOpen) return null;
 
@@ -43,7 +44,7 @@ export function ExportOptionsModal({
     };
 
     const handleExport = () => {
-        onExport(selectedColumns, includeHeaders);
+        onExport(selectedColumns, includeHeaders, format);
         onClose();
     };
 
@@ -63,6 +64,32 @@ export function ExportOptionsModal({
                 </div>
 
                 <div className="p-6">
+                    <div className="mb-6">
+                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                            Export Format
+                        </label>
+                        <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                            <button
+                                onClick={() => setFormat('csv')}
+                                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${format === 'csv'
+                                    ? 'bg-white dark:bg-gray-600 text-maroon-600 dark:text-white shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                CSV
+                            </button>
+                            <button
+                                onClick={() => setFormat('pdf')}
+                                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${format === 'pdf'
+                                    ? 'bg-white dark:bg-gray-600 text-maroon-600 dark:text-white shadow-sm'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
                             <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -101,24 +128,26 @@ export function ExportOptionsModal({
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <button
-                            onClick={() => setIncludeHeaders(!includeHeaders)}
-                            className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors w-full text-left"
-                        >
-                            <div className={`
+                    {format === 'csv' && (
+                        <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <button
+                                onClick={() => setIncludeHeaders(!includeHeaders)}
+                                className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors w-full text-left"
+                            >
+                                <div className={`
                 w-5 h-5 rounded border flex items-center justify-center transition-colors
                 ${includeHeaders
-                                    ? 'bg-maroon-600 border-maroon-600 text-white'
-                                    : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-maroon-500'}
+                                        ? 'bg-maroon-600 border-maroon-600 text-white'
+                                        : 'border-gray-300 dark:border-gray-600 text-transparent hover:border-maroon-500'}
               `}>
-                                <CheckSquare className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="text-gray-700 dark:text-gray-300 font-medium">
-                                Include Headers
-                            </span>
-                        </button>
-                    </div>
+                                    <CheckSquare className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                    Include Headers
+                                </span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
@@ -134,7 +163,7 @@ export function ExportOptionsModal({
                         className="px-4 py-2 bg-maroon-600 hover:bg-maroon-700 disabled:bg-maroon-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
                     >
                         <Download className="w-4 h-4" />
-                        Export CSV
+                        Export {format.toUpperCase()}
                     </button>
                 </div>
             </div>
