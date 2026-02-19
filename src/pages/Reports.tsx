@@ -3,6 +3,7 @@ import { memberService } from '../services/member-service';
 import { contributionService } from '../services/contribution-service';
 import { Filter, Download, Calendar, Users as UsersIcon, TrendingUp } from 'lucide-react';
 import type { Member, Contribution } from '../types/database';
+import { ExportOptionsModal, type ColumnOption } from '../components/ExportOptionsModal';
 
 export function Reports() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -98,36 +99,44 @@ export function Reports() {
 
 
 
-  const exportToCSV = () => {
-    const headers = [
-      'Reg No',
-      'Name',
-      'Faculty',
-      'Batch',
-      'Total Points',
-      'Project Count',
-      'WhatsApp',
-    ];
 
+
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const availableColumns: ColumnOption[] = [
+    { key: 'reg_no', label: 'Reg No' },
+    { key: 'name_with_initials', label: 'Name' },
+    { key: 'faculty', label: 'Faculty' },
+    { key: 'batch', label: 'Batch' },
+    { key: 'total_points', label: 'Total Points' },
+    { key: 'project_count', label: 'Project Count' },
+    { key: 'whatsapp', label: 'WhatsApp' },
+  ];
+
+  const handleExport = (selectedColumns: string[], includeHeaders: boolean) => {
     const memberContributions = new Map<string, number>();
     contributions.forEach((contrib) => {
       const current = memberContributions.get(contrib.member_reg_no) || 0;
       memberContributions.set(contrib.member_reg_no, current + 1);
     });
 
-    const rows = filteredMembers.map((member) => [
-      member.reg_no,
-      member.name_with_initials,
-      member.faculty,
-      member.batch,
-      member.total_points,
-      memberContributions.get(member.reg_no) || 0,
-      member.whatsapp,
-    ]);
+    const headers = selectedColumns.map(key => availableColumns.find(c => c.key === key)?.label || key);
 
-    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const rows = filteredMembers.map((member) => {
+      return selectedColumns.map(key => {
+        if (key === 'project_count') return memberContributions.get(member.reg_no) || 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (member as any)[key];
+      });
+    });
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    let csvContent = '';
+    if (includeHeaders) {
+      csvContent += headers.join(',') + '\n';
+    }
+    csvContent += rows.map((row) => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -135,6 +144,7 @@ export function Reports() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
+
 
   if (loading) {
     return (
@@ -160,7 +170,7 @@ export function Reports() {
         </div>
 
         <button
-          onClick={exportToCSV}
+          onClick={() => setShowExportModal(true)}
           className="flex items-center gap-2 px-6 py-3 bg-maroon-600 hover:bg-maroon-700 text-white rounded-lg font-medium transition-colors duration-200 shadow-md"
         >
           <Download className="w-5 h-5" />
@@ -315,6 +325,14 @@ export function Reports() {
           </table>
         </div>
       </div>
-    </div>
+
+
+      <ExportOptionsModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExport}
+        availableColumns={availableColumns}
+      />
+    </div >
   );
 }
