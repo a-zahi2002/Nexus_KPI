@@ -83,11 +83,10 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
           Time Period <span className="text-red-500">*</span>
         </label>
         <input
-          type="text"
+          type="month"
           value={formData.time_period}
           onChange={(e) => setFormData({ ...formData, time_period: e.target.value })}
           required
-          placeholder="November 2024"
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         />
       </div>
