@@ -17,7 +17,7 @@ export const memberService = {
     const { data, error } = await supabase
       .from('members')
       .select('*')
-      .eq('reg_no', regNo)
+      .ilike('reg_no', regNo)
       .maybeSingle();
 
     if (error) throw error;

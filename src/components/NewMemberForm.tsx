@@ -112,7 +112,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
           <input
             type="text"
             value={formData.reg_no}
-            onChange={(e) => setFormData({ ...formData, reg_no: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, reg_no: e.target.value.toUpperCase() })}
             required
             placeholder="S/2021/001"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
