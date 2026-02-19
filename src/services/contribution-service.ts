@@ -31,6 +31,7 @@ export const contributionService = {
       .insert({
         ...contribution,
         added_by: user?.id || null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select()
       .single();

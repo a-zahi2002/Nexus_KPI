@@ -1,15 +1,15 @@
 {
   "name": "sabraleos-kpi-system",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "node node_modules/vite/bin/vite.js",
     "build": "node node_modules/vite/bin/vite.js build",
-    "lint": "eslint .",
+    "lint": "node node_modules/eslint/bin/eslint.js .",
     "preview": "node node_modules/vite/bin/vite.js preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "test": "vitest run"
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json",
+    "test": "node node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

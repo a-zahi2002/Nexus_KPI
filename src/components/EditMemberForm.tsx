@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { memberService } from '../services/member-service';
 import { Camera, Loader2 } from 'lucide-react';
 import type { Member } from '../types/database';
@@ -64,8 +64,11 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { reg_no: _reg_no, ...updateData } = formData;
+
       const updatedMember = await memberService.update(member.reg_no, {
-        ...formData,
+        ...updateData,
         photo_url: photoUrl,
       });
 
@@ -81,7 +84,7 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Member Details</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex justify-center">
             <div className="relative">

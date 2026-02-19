@@ -49,6 +49,7 @@ export const memberService = {
   async create(member: MemberInsert): Promise<Member> {
     const { data, error } = await supabase
       .from('members')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .insert(member as any)
       .select()
       .single();
@@ -60,7 +61,8 @@ export const memberService = {
   async update(regNo: string, updates: MemberUpdate): Promise<Member> {
     const { data, error } = await supabase
       .from('members')
-      // @ts-ignore
+      // @ts-expect-error: Suppress type mismatch
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update(updates as any)
       .eq('reg_no', regNo)
       .select()

@@ -40,23 +40,6 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
   const [selectedFaculty, setSelectedFaculty] = useState<string>('');
   const [selectedBatch, setSelectedBatch] = useState<string>('');
 
-  useEffect(() => {
-    loadMembers();
-  }, [leaderboardType, selectedMonth]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [allMembers, selectedFaculty, selectedBatch]);
-
-  useEffect(() => {
-    if (initialSearch) {
-      handleSearch(initialSearch);
-    }
-    if (initialAction === 'add-points') {
-      setShowAddContribution(true);
-    }
-  }, [initialSearch, initialAction]);
-
   const loadMembers = async () => {
     try {
       setLoadingMembers(true);
@@ -78,7 +61,7 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
         // Sort by monthly points desc
         data = membersWithMonthlyPoints.sort((a, b) => b.total_points - a.total_points);
       } else {
-        // Ensure default sort is by total_points desc (service usually does this, but good to ensure)
+        // Ensure default sort is by total_points desc
         data = data.sort((a, b) => b.total_points - a.total_points);
       }
 
@@ -88,20 +71,6 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
     } finally {
       setLoadingMembers(false);
     }
-  };
-
-  const applyFilters = () => {
-    let result = [...allMembers];
-
-    if (selectedFaculty) {
-      result = result.filter(m => m.faculty === selectedFaculty);
-    }
-
-    if (selectedBatch) {
-      result = result.filter(m => m.batch === selectedBatch);
-    }
-
-    setFilteredMembers(result);
   };
 
   const handleSearch = async (query?: string) => {
@@ -130,6 +99,31 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadMembers();
+    // loadMembers reads leaderboardType and selectedMonth from closure — intentional pattern
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leaderboardType, selectedMonth]);
+
+  useEffect(() => {
+    let result = [...allMembers];
+    if (selectedFaculty) result = result.filter(m => m.faculty === selectedFaculty);
+    if (selectedBatch) result = result.filter(m => m.batch === selectedBatch);
+    setFilteredMembers(result);
+  }, [allMembers, selectedFaculty, selectedBatch]);
+
+  useEffect(() => {
+    if (initialSearch) {
+      handleSearch(initialSearch);
+    }
+    if (initialAction === 'add-points') {
+      setShowAddContribution(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSearch, initialAction]);
+
+
 
   const handleMemberCreated = (member: Member) => {
     setShowNewMemberForm(false);
@@ -452,8 +446,8 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
                   <button
                     onClick={() => setLeaderboardType('all-time')}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${leaderboardType === 'all-time'
-                        ? 'bg-white dark:bg-gray-600 text-maroon-600 dark:text-white shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      ? 'bg-white dark:bg-gray-600 text-maroon-600 dark:text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                   >
                     All Time
@@ -461,8 +455,8 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
                   <button
                     onClick={() => setLeaderboardType('monthly')}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${leaderboardType === 'monthly'
-                        ? 'bg-white dark:bg-gray-600 text-maroon-600 dark:text-white shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      ? 'bg-white dark:bg-gray-600 text-maroon-600 dark:text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                   >
                     Monthly

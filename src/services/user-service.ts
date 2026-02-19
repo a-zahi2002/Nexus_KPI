@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type PostgrestError } from '@supabase/supabase-js';
 import type { AppUser, AppUserInsert } from '../types/database';
 
 export const userService = {
@@ -68,6 +68,7 @@ export const userService = {
       .insert({
         id: authData.user.id,
         ...userData,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select()
       .single();
@@ -80,7 +81,8 @@ export const userService = {
   async update(id: string, updates: Partial<Omit<AppUser, 'id' | 'created_at'>>): Promise<AppUser> {
     const { data, error } = await supabase
       .from('app_users')
-      // @ts-ignore
+      // @ts-expect-error: Suppress type mismatch
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update(updates as any)
       .eq('id', id)
       .select()
@@ -97,7 +99,7 @@ export const userService = {
     if (error) throw error;
   },
 
-  async delete(id: string): Promise<{ error: any }> {
+  async delete(id: string): Promise<{ error: PostgrestError | null }> {
     // NOTE: This only deletes the app_users row.
     // The auth.users row persists (requires service role key to delete).
     // See USER_DELETION_GUIDE.md for manual cleanup instructions.
