@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
 
+const isDev = import.meta.env.DEV;
+
 export async function initializeDatabase() {
   try {
     const { data: tables, error: tablesError } = await supabase
@@ -20,6 +22,9 @@ export async function initializeDatabase() {
 }
 
 export async function seedMockData() {
+  // Only seed in development — never in production
+  if (!isDev) return;
+
   try {
     const { data: existingMembers } = await supabase
       .from('members')
@@ -27,7 +32,6 @@ export async function seedMockData() {
       .limit(1);
 
     if (existingMembers && existingMembers.length > 0) {
-      console.log('Database already has data');
       return;
     }
 
@@ -69,10 +73,9 @@ export async function seedMockData() {
 
     if (membersError) {
       console.error('Error seeding members:', membersError);
-    } else {
-      console.log('Mock data seeded successfully');
     }
   } catch (error) {
     console.error('Seeding error:', error);
   }
 }
+
