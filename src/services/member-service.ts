@@ -17,7 +17,7 @@ export const memberService = {
     const { data, error } = await supabase
       .from('members')
       .select('*')
-      .eq('reg_no', regNo)
+      .ilike('reg_no', regNo)
       .maybeSingle();
 
     if (error) throw error;
@@ -49,7 +49,7 @@ export const memberService = {
   async create(member: MemberInsert): Promise<Member> {
     const { data, error } = await supabase
       .from('members')
-      .insert(member)
+      .insert(member as any)
       .select()
       .single();
 
@@ -60,7 +60,8 @@ export const memberService = {
   async update(regNo: string, updates: MemberUpdate): Promise<Member> {
     const { data, error } = await supabase
       .from('members')
-      .update(updates)
+      // @ts-ignore
+      .update(updates as any)
       .eq('reg_no', regNo)
       .select()
       .single();

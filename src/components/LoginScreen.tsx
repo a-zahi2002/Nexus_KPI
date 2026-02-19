@@ -67,7 +67,7 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#e8e8e8] dark:bg-[#0a0a0f]">
+    <div className="min-h-screen w-full flex items-center justify-center p-4">
       {/* Floating Tile Container - Portrait Style */}
       <div className="w-full max-w-md glass-panel rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col items-center py-8 px-6 max-h-[95vh]">
 
@@ -114,7 +114,7 @@ export function LoginScreen() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-white text-black px-4 py-3 font-bold text-base shadow-md border-none focus:ring-2 focus:ring-maroon-600 outline-none placeholder-black/60 text-center rounded-xl"
-                placeholder="USER EMAIL"
+                placeholder="USER NAME OR EMAIL"
               />
             </div>
 
@@ -153,8 +153,8 @@ export function LoginScreen() {
               type="submit"
               disabled={loading || isLockedOut}
               className={`w-full font-bold py-3 px-4 rounded-xl shadow-lg uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-2 mt-2 ${isLockedOut
-                  ? 'bg-gray-400 cursor-not-allowed text-gray-200'
-                  : 'bg-maroon-600 hover:bg-maroon-700 text-white'
+                ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+                : 'bg-maroon-600 hover:bg-maroon-700 text-white'
                 }`}
             >
               {loading ? (

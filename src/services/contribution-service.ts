@@ -31,12 +31,12 @@ export const contributionService = {
       .insert({
         ...contribution,
         added_by: user?.id || null,
-      })
+      } as any)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as unknown as Contribution;
   },
 
   async getByDateRange(startDate: string, endDate: string): Promise<Contribution[]> {
@@ -48,7 +48,7 @@ export const contributionService = {
       .order('date_added', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data as unknown as Contribution[]) || [];
   },
 
   async getMonthlyStats(year: number, month: number): Promise<number> {
@@ -71,7 +71,9 @@ export const contributionService = {
       .select('points');
 
     if (error) throw error;
-    return data?.reduce((sum, c) => sum + c.points, 0) || 0;
+    // Cast data to ensure TS knows it has 'points'
+    const contributions = (data as unknown as { points: number }[]) || [];
+    return contributions.reduce((sum, c) => sum + c.points, 0);
   },
 
   async delete(id: string): Promise<void> {
@@ -81,6 +83,31 @@ export const contributionService = {
       .eq('id', id);
 
     if (error) throw error;
+  },
+
+  async getMonthlyLeaderboard(year: number, month: number): Promise<{ reg_no: string; monthly_points: number }[]> {
+    // Format: YYYY-MM (e.g., 2024-02 for February)
+    const monthStr = month.toString().padStart(2, '0');
+    const timePeriod = `${year}-${monthStr}`;
+
+    const { data, error } = await supabase
+      .from('contributions')
+      .select('member_reg_no, points')
+      .eq('time_period', timePeriod);
+
+    if (error) throw error;
+
+    // Aggregate points by member
+    const aggregations: Record<string, number> = {};
+    const contributions = (data as unknown as { member_reg_no: string; points: number }[]) || [];
+
+    contributions.forEach((c) => {
+      aggregations[c.member_reg_no] = (aggregations[c.member_reg_no] || 0) + c.points;
+    });
+
+    return Object.entries(aggregations)
+      .map(([reg_no, monthly_points]) => ({ reg_no, monthly_points }))
+      .sort((a, b) => b.monthly_points - a.monthly_points);
   },
 };
 

@@ -1,3 +1,11 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export interface Database {
   public: {
     Tables: {
@@ -5,17 +13,48 @@ export interface Database {
         Row: Member;
         Insert: MemberInsert;
         Update: MemberUpdate;
+        Relationships: [];
       };
       contributions: {
         Row: Contribution;
         Insert: ContributionInsert;
         Update: ContributionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "contributions_member_reg_no_fkey";
+            columns: ["member_reg_no"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["reg_no"];
+          }
+        ];
       };
       app_users: {
         Row: AppUser;
         Insert: AppUserInsert;
         Update: AppUserUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "app_users_linked_member_reg_no_fkey";
+            columns: ["linked_member_reg_no"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["reg_no"];
+          }
+        ];
       };
+    };
+    Views: {
+      [_ in never]: never
+    };
+    Functions: {
+      [_ in never]: never
+    };
+    Enums: {
+      [_ in never]: never
+    };
+    CompositeTypes: {
+      [_ in never]: never
     };
   };
 }
