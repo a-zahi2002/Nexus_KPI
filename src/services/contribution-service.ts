@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { validatePoints } from '../lib/sanitize';
 import type { Contribution, ContributionInsert } from '../types/database';
 
 export const contributionService = {
@@ -24,6 +25,9 @@ export const contributionService = {
   },
 
   async create(contribution: ContributionInsert): Promise<Contribution> {
+    const pointsCheck = validatePoints(contribution.points);
+    if (!pointsCheck.valid) throw new Error(pointsCheck.error);
+
     const { data: { user } } = await supabase.auth.getUser();
 
     const { data, error } = await supabase
@@ -56,14 +60,14 @@ export const contributionService = {
     const startDate = new Date(year, month - 1, 1).toISOString();
     const endDate = new Date(year, month, 0, 23, 59, 59).toISOString();
 
-    const { data, error } = await supabase
+    const { count, error } = await supabase
       .from('contributions')
       .select('project_name', { count: 'exact', head: true })
       .gte('date_added', startDate)
       .lte('date_added', endDate);
 
     if (error) throw error;
-    return data ? (data as unknown as number) : 0;
+    return count ?? 0;
   },
 
   async getTotalPoints(): Promise<number> {

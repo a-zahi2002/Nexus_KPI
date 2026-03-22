@@ -72,20 +72,36 @@ export const memberService = {
     return data;
   },
 
-  async uploadPhoto(file: File): Promise<string> {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `member-photos/${fileName}`;
+  async uploadPhoto(file: File, oldPhotoUrl?: string | null): Promise<string> {
+    const { validatePhotoFile } = await import('../lib/sanitize');
+    const validation = validatePhotoFile(file);
+    if (!validation.valid) throw new Error(validation.error);
+
+    const EXT_MAP: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+    };
+    const ext = EXT_MAP[file.type] ?? 'jpg';
+    const randomId = crypto.randomUUID();
+    const filePath = `member-photos/${randomId}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from('members')
-      .upload(filePath, file);
+      .upload(filePath, file, { contentType: file.type, upsert: false });
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
-      .from('members')
-      .getPublicUrl(filePath);
+    const { data } = supabase.storage.from('members').getPublicUrl(filePath);
+
+    // Delete old photo (best-effort)
+    if (oldPhotoUrl) {
+      try {
+        const oldPath = oldPhotoUrl.split('/members/')[1];
+        if (oldPath) await supabase.storage.from('members').remove([oldPath]);
+      } catch { /* non-fatal */ }
+    }
 
     return data.publicUrl;
   },

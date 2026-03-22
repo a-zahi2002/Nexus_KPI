@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { memberService } from '../services/member-service';
 import { Camera, Loader2 } from 'lucide-react';
+import { validatePhotoFile, validateRegNo, validatePhoneNumber, sanitizeTextInput } from '../lib/sanitize';
 import type { Member } from '../types/database';
 
 interface NewMemberFormProps {
@@ -21,6 +22,8 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [photoError, setPhotoError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,8 +40,14 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
   ];
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhotoError('');
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validatePhotoFile(file);
+      if (!validation.valid) {
+        setPhotoError(validation.error || 'Invalid photo');
+        return;
+      }
       setPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -48,8 +57,22 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
     }
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!validateRegNo(formData.reg_no)) errors.reg_no = 'Invalid Registration Number format (e.g. S/2021/001)';
+    if (!formData.full_name.trim()) errors.full_name = 'Full Name is required';
+    if (!formData.name_with_initials.trim()) errors.name_with_initials = 'Name with Initials is required';
+    if (!/^\d{4}$/.test(formData.batch)) errors.batch = 'Batch must be a 4-digit year';
+    if (!formData.faculty) errors.faculty = 'Faculty selection is required';
+    if (!validatePhoneNumber(formData.whatsapp)) errors.whatsapp = 'Invalid phone number format';
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setError('');
     setLoading(true);
 
@@ -65,7 +88,13 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
       }
 
       const member = await memberService.create({
-        ...formData,
+        reg_no: sanitizeTextInput(formData.reg_no),
+        full_name: sanitizeTextInput(formData.full_name),
+        name_with_initials: sanitizeTextInput(formData.name_with_initials),
+        my_lci_num: sanitizeTextInput(formData.my_lci_num),
+        batch: sanitizeTextInput(formData.batch),
+        faculty: formData.faculty,
+        whatsapp: sanitizeTextInput(formData.whatsapp),
         photo_url: photoUrl,
       });
 
@@ -94,13 +123,14 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={handlePhotoChange}
             className="hidden"
           />
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
             Click to add photo
           </p>
+          {photoError && <p className="mt-1 text-xs text-red-500 text-center">{photoError}</p>}
         </div>
       </div>
 
@@ -117,6 +147,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
             placeholder="S/2021/001"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
+          {fieldErrors.reg_no && <p className="mt-1 text-xs text-red-500">{fieldErrors.reg_no}</p>}
         </div>
 
         <div className="md:col-span-2">
@@ -131,6 +162,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
             placeholder="Saman Kumara Perera"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
+          {fieldErrors.full_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.full_name}</p>}
         </div>
 
         <div className="md:col-span-2">
@@ -145,6 +177,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
             placeholder="S. K. Perera"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
+          {fieldErrors.name_with_initials && <p className="mt-1 text-xs text-red-500">{fieldErrors.name_with_initials}</p>}
         </div>
 
         <div>
@@ -159,6 +192,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
             placeholder="2021"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
+          {fieldErrors.batch && <p className="mt-1 text-xs text-red-500">{fieldErrors.batch}</p>}
         </div>
 
         <div>
@@ -178,6 +212,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
               </option>
             ))}
           </select>
+          {fieldErrors.faculty && <p className="mt-1 text-xs text-red-500">{fieldErrors.faculty}</p>}
         </div>
 
         <div>
@@ -192,6 +227,7 @@ export function NewMemberForm({ initialRegNo, onSuccess, onCancel }: NewMemberFo
             placeholder="+94771234567"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
+          {fieldErrors.whatsapp && <p className="mt-1 text-xs text-red-500">{fieldErrors.whatsapp}</p>}
         </div>
 
         <div>
