@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { contributionService } from '../services/contribution-service';
 import { Loader2 } from 'lucide-react';
+import { sanitizeTextInput, validatePoints } from '../lib/sanitize';
 import type { Member } from '../types/database';
 
 interface AddContributionFormProps {
@@ -17,6 +18,7 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
     points: '',
     avenue: '',
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,17 +33,34 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
     'Community Service',
   ];
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!formData.project_name.trim()) errors.project_name = 'Project Name is required';
+    if (!formData.time_period.trim()) errors.time_period = 'Time Period is required';
+    if (!formData.position.trim()) errors.position = 'Position is required';
+    
+    const parsedPoints = parseInt(formData.points, 10);
+    const pointsValidation = validatePoints(parsedPoints);
+    if (!pointsValidation.valid) {
+      errors.points = pointsValidation.error || 'Invalid points';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setError('');
     setLoading(true);
 
     try {
       await contributionService.create({
         member_reg_no: member.reg_no,
-        project_name: formData.project_name,
+        project_name: sanitizeTextInput(formData.project_name),
         time_period: formData.time_period,
-        position: formData.position,
+        position: sanitizeTextInput(formData.position),
         points: parseInt(formData.points, 10),
         avenue: formData.avenue || null,
       });
@@ -74,8 +93,10 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
           onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
           required
           placeholder="World Diabetes Day Campaign"
+          maxLength={200}
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         />
+        {fieldErrors.project_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.project_name}</p>}
       </div>
 
       <div>
@@ -89,6 +110,7 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
           required
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         />
+        {fieldErrors.time_period && <p className="mt-1 text-xs text-red-500">{fieldErrors.time_period}</p>}
       </div>
 
       <div>
@@ -101,8 +123,10 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
           onChange={(e) => setFormData({ ...formData, position: e.target.value })}
           required
           placeholder="Project Coordinator"
+          maxLength={100}
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         />
+        {fieldErrors.position && <p className="mt-1 text-xs text-red-500">{fieldErrors.position}</p>}
       </div>
 
       <div>
@@ -114,10 +138,12 @@ export function AddContributionForm({ member, onSuccess, onCancel }: AddContribu
           value={formData.points}
           onChange={(e) => setFormData({ ...formData, points: e.target.value })}
           required
-          min="0"
+          min="1"
+          max="1000"
           placeholder="10"
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         />
+        {fieldErrors.points && <p className="mt-1 text-xs text-red-500">{fieldErrors.points}</p>}
       </div>
 
       <div>

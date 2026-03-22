@@ -73,3 +73,32 @@ export function sanitizeTextInput(input: string): string {
     .replace(/<[^>]*>/g, '') // Strip HTML tags
     .trim();
 }
+
+export function validatePhotoFile(file: File): { valid: boolean; error?: string } {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    return { valid: false, error: 'Invalid file type. Please upload a JPEG, PNG, WEBP, or GIF image.' };
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return { valid: false, error: 'File size must be under 5MB.' };
+  }
+  return { valid: true };
+}
+
+export function validatePhoneNumber(phone: string): boolean {
+  return /^\+?[1-9]\d{6,14}$/.test(phone);
+}
+
+export function validateRegNo(regNo: string): boolean {
+  return /^[A-Z]{1,3}\/\d{4}\/\d{1,4}$/.test(regNo);
+}
+
+export function validatePoints(value: number): { valid: boolean; error?: string } {
+  if (!Number.isInteger(value) || value <= 0) {
+    return { valid: false, error: 'Points must be a positive integer.' };
+  }
+  if (value > 1000) {
+    return { valid: false, error: 'Points cannot exceed 1000.' };
+  }
+  return { valid: true };
+}

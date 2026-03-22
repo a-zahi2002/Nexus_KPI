@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { createClient, type PostgrestError } from '@supabase/supabase-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import type { AppUser, AppUserInsert } from '../types/database';
 
 export const userService = {
@@ -34,6 +34,7 @@ export const userService = {
       throw new Error('Unauthorized: Only Super Admins can create users.');
     }
 
+    const { createClient } = await import('@supabase/supabase-js');
     const tempClient = createClient(
       import.meta.env.VITE_SUPABASE_URL,
       import.meta.env.VITE_SUPABASE_ANON_KEY,

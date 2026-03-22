@@ -161,17 +161,14 @@ export function Reports() {
       doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
 
       // Add Filters Info if any
-      let filterText = 'Filters: ';
       const activeFilters = [];
       if (filters.faculty) activeFilters.push(`Faculty: ${filters.faculty}`);
-      // if (filters.batch) activeFilters.push(`Batch: ${filters.batch}`); // Assuming batch filter exists in context, though strictly it's not in local state shown
-      // Note: In strict Reports component shown, filters.batch isn't there, but let's stick to what's available
       if (filters.startDate) activeFilters.push(`Start: ${filters.startDate}`);
       if (filters.endDate) activeFilters.push(`End: ${filters.endDate}`);
       if (filters.minProjects) activeFilters.push(`Min Projects: ${filters.minProjects}`);
 
       if (activeFilters.length > 0) {
-        doc.text(filterText + activeFilters.join(', '), 14, 36);
+        doc.text(`Filters: ${activeFilters.join(', ')}`, 14, 36);
       }
 
       // Generate Table

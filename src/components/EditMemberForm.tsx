@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { memberService } from '../services/member-service';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, X } from 'lucide-react';
+import { validatePhotoFile, validatePhoneNumber, sanitizeTextInput } from '../lib/sanitize';
 import type { Member } from '../types/database';
 
 interface EditMemberFormProps {
@@ -21,6 +22,8 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>(member.photo_url || '');
+  const [photoError, setPhotoError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,8 +40,14 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
   ];
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhotoError('');
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validatePhotoFile(file);
+      if (!validation.valid) {
+        setPhotoError(validation.error || 'Invalid photo');
+        return;
+      }
       setPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -48,8 +57,27 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
     }
   };
 
+  const handleRemovePhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPhotoFile(null);
+    setPhotoPreview('');
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!formData.full_name.trim()) errors.full_name = 'Full Name is required';
+    if (!formData.name_with_initials.trim()) errors.name_with_initials = 'Name with Initials is required';
+    if (!/^\d{4}$/.test(formData.batch)) errors.batch = 'Batch must be a 4-digit year';
+    if (!formData.faculty) errors.faculty = 'Faculty selection is required';
+    if (!validatePhoneNumber(formData.whatsapp)) errors.whatsapp = 'Invalid phone number format';
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setError('');
     setLoading(true);
 
@@ -58,17 +86,22 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
 
       if (photoFile) {
         try {
-          photoUrl = await memberService.uploadPhoto(photoFile);
+          photoUrl = await memberService.uploadPhoto(photoFile, member.photo_url);
         } catch (uploadError) {
           console.warn('Photo upload failed, continuing without photo update:', uploadError);
         }
+      } else if (!photoPreview && !photoFile) {
+        photoUrl = null;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { reg_no: _reg_no, ...updateData } = formData;
 
       const updatedMember = await memberService.update(member.reg_no, {
-        ...updateData,
+        full_name: sanitizeTextInput(formData.full_name),
+        name_with_initials: sanitizeTextInput(formData.name_with_initials),
+        my_lci_num: sanitizeTextInput(formData.my_lci_num),
+        batch: sanitizeTextInput(formData.batch),
+        faculty: formData.faculty,
+        whatsapp: sanitizeTextInput(formData.whatsapp),
         photo_url: photoUrl,
       });
 
@@ -98,16 +131,29 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
                   <Camera className="w-12 h-12 text-gray-400" />
                 )}
               </div>
+              <div className="absolute top-0 right-0">
+                {photoPreview && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md"
+                    title="Remove photo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/gif"
                 onChange={handlePhotoChange}
                 className="hidden"
               />
               <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
                 Click to change photo
               </p>
+              {photoError && <p className="mt-1 text-xs text-red-500 text-center">{photoError}</p>}
             </div>
           </div>
 
@@ -136,6 +182,7 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
+              {fieldErrors.full_name && <p className="mt-1 text-xs text-red-500">{fieldErrors.full_name}</p>}
             </div>
 
             <div className="md:col-span-2">
@@ -181,6 +228,7 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
                   </option>
                 ))}
               </select>
+              {fieldErrors.faculty && <p className="mt-1 text-xs text-red-500">{fieldErrors.faculty}</p>}
             </div>
 
             <div>
