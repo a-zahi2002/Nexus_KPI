@@ -143,7 +143,15 @@ export function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormPr
                 className="w-32 h-32 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 overflow-hidden border-4 border-white dark:border-gray-600 shadow-lg"
               >
                 {photoPreview ? (
-                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    crossOrigin="anonymous"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 ) : (
                   <Camera className="w-12 h-12 text-gray-400" />
                 )}

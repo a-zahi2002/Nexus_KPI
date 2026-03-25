@@ -276,7 +276,20 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
                   <img
                     src={searchResult.photo_url}
                     alt={searchResult.full_name}
+                    crossOrigin="anonymous"
                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                    onError={(e) => {
+                      // Hide broken image and show initials fallback
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-lg';
+                        fallback.innerHTML = `<span style="font-size:2.25rem;font-weight:700;color:#7f1d1d">${searchResult.full_name.charAt(0)}</span>`;
+                        parent.insertBefore(fallback, target);
+                      }
+                    }}
                   />
                   <button
                     onClick={() => downloadImage(searchResult.photo_url!, `${searchResult.reg_no.replace(/\//g, '_')}_photo.jpg`)}
@@ -591,7 +604,11 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
                               <img
                                 src={member.photo_url}
                                 alt={member.name_with_initials}
+                                crossOrigin="anonymous"
                                 className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-white/10 shadow-sm"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
                               />
                             ) : (
                               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
