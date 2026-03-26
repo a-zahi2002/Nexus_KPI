@@ -5,6 +5,10 @@
 /**
  * Optimizes an image file by resizing and compressing it.
  * Forces the output to JPEG format for better compression.
+ *
+ * NOTE: All event handlers are assigned before FileReader starts
+ * to avoid a race condition where img.onload fires after img.src
+ * is set (possible when the browser has the data cached).
  */
 export async function optimizeImage(
   file: File,
@@ -13,16 +17,11 @@ export async function optimizeImage(
   const { maxWidth = 800, maxHeight = 800, quality = 0.8 } = options;
 
   return new Promise((resolve, reject) => {
-    // Create an image element
     const img = new Image();
     const reader = new FileReader();
 
-    reader.onload = (e) => {
-      img.src = e.target?.result as string;
-    };
-
+    // Wire up all img handlers BEFORE we set src (prevents missing onload on cache hit)
     img.onload = () => {
-      // Calculate new dimensions while maintaining aspect ratio
       let width = img.width;
       let height = img.height;
 
@@ -38,7 +37,6 @@ export async function optimizeImage(
         }
       }
 
-      // Create canvas and draw image
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
@@ -51,7 +49,6 @@ export async function optimizeImage(
 
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Convert to blob
       canvas.toBlob(
         (blob) => {
           if (blob) {
@@ -66,7 +63,20 @@ export async function optimizeImage(
     };
 
     img.onerror = () => {
-      reject(new Error('Could not load image'));
+      reject(new Error('Could not load image: the file may be corrupt or unsupported'));
+    };
+
+    // Use onloadend (fires for both success and error) to wire FileReader → img
+    reader.onloadend = () => {
+      if (reader.result) {
+        img.src = reader.result as string;
+      } else {
+        reject(new Error('Could not read file'));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Could not read file'));
     };
 
     reader.readAsDataURL(file);
@@ -74,24 +84,30 @@ export async function optimizeImage(
 }
 
 /**
- * Downloads a file from a URL.
+ * Downloads an image from a URL by fetching it as a blob and triggering a
+ * browser download. Falls back to opening the URL directly if fetch fails
+ * (e.g. due to CORS restrictions on private buckets).
  */
 export async function downloadImage(url: string, filename: string): Promise<void> {
   try {
-    const response = await fetch(url);
+    // mode: 'cors' — Supabase public buckets support CORS for GET requests
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = blobUrl;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl);
+
+    // Small delay before revoking so the browser has time to start the download
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
   } catch (error) {
-    console.error('Download failed:', error);
-    // Fallback: open in new tab
+    console.warn('Blob download failed, falling back to new tab:', error);
+    // Fallback: open in new tab so the user can save manually
     window.open(url, '_blank');
   }
 }

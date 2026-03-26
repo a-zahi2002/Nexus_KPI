@@ -143,6 +143,28 @@ After setting up the database:
 3. Link user accounts to member records
 4. Start adding members and tracking contributions
 
+## Deployment
+
+This project is deployed on **Cloudflare Pages**.
+
+### Build settings
+- Framework preset: Vite
+- Build command: `npm run build`  
+- Build output directory: `dist`
+- Node version: 20
+
+### Environment variables (set in Cloudflare Pages dashboard)
+- `VITE_SUPABASE_URL` — Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` — Supabase anon public key
+
+### Keep-alive
+A GitHub Actions workflow (`.github/workflows/keep-alive.yml`) pings Supabase 
+every 3 days to prevent free-tier inactivity pausing.
+
+Required GitHub repository secrets:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
 ## User Roles
 
 ### Super Admin

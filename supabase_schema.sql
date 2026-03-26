@@ -115,11 +115,30 @@ CREATE POLICY "batches_all" ON public.batches FOR ALL TO authenticated USING (pu
 CREATE POLICY "system_logs_select" ON public.system_logs FOR SELECT TO authenticated USING (public.get_my_role() IN ('super_admin', 'editor'));
 CREATE POLICY "system_logs_insert" ON public.system_logs FOR INSERT TO authenticated WITH CHECK (true);
 
--- Storage Policies (Run this manually in the Storage tab or SQL editor carefully)
--- These assume a bucket named 'members' exists
--- CREATE POLICY "storage_members_select" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'members');
--- CREATE POLICY "storage_members_insert" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'members' AND public.get_my_role() IN ('super_admin','editor'));
--- CREATE POLICY "storage_members_delete" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'members' AND public.get_my_role() = 'super_admin');
+-- Storage Policies
+-- IMPORTANT: The 'members' bucket MUST be set to PUBLIC in the Supabase dashboard
+--   Storage → Buckets → members → Edit → toggle "Public bucket" ON
+-- Then run the following SQL to set the correct RLS policies on storage.objects:
+
+-- Allow anyone (including anonymous) to VIEW photos (required for img src / getPublicUrl)
+CREATE POLICY "storage_members_public_select"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'members');
+
+-- Allow authenticated editors/super_admins to UPLOAD photos
+CREATE POLICY "storage_members_insert"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'members' AND public.get_my_role() IN ('super_admin', 'editor'));
+
+-- Allow authenticated editors/super_admins to UPDATE (replace) photos
+CREATE POLICY "storage_members_update"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'members' AND public.get_my_role() IN ('super_admin', 'editor'));
+
+-- Allow super_admins to DELETE photos
+CREATE POLICY "storage_members_delete"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'members' AND public.get_my_role() = 'super_admin');
 
 -- 3. Triggers & Functions
 -- ==========================================
