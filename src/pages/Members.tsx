@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { memberService } from '../services/member-service';
 import { contributionService } from '../services/contribution-service';
-import { Search, UserPlus, Award, User, X, FileDown, Pencil, Download } from 'lucide-react';
+import { Search, UserPlus, Award, User, X, FileDown, Pencil, Download, Trash2 } from 'lucide-react';
 import type { Member, Contribution } from '../types/database';
 import { NewMemberForm } from '../components/NewMemberForm';
 import { EditMemberForm } from '../components/EditMemberForm';
@@ -160,6 +160,29 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
     }
   };
 
+
+
+  const handleDeleteMember = async () => {
+    if (!searchResult) return;
+    
+    if (!window.confirm(`Are you sure you want to delete ${searchResult.full_name} COMPLETELY? This action cannot be undone and will delete ALL their contribution history (points).`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await memberService.delete(searchResult.reg_no);
+      setSearchResult(null);
+      setSearchQuery('');
+      loadMembers();
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete member completely. You may not have sufficient permissions.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleViewMember = (member: Member) => {
     setSearchResult(member);
     setSearchQuery(member.reg_no);
@@ -210,7 +233,7 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Enter University Reg No (e.g., S/2021/001)"
+            placeholder="Enter University Reg No (e.g., 22ABC1234)"
             className="flex-1 px-4 py-3 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-maroon-500 focus:border-transparent bg-white/50 dark:bg-dark-bg/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500"
           />
           <button
@@ -384,6 +407,13 @@ export function Members({ initialSearch, initialAction }: MembersProps) {
                     >
                       <Pencil className="w-5 h-5" />
                       Edit Member Details
+                    </button>
+                    <button
+                      onClick={handleDeleteMember}
+                      className="flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/30 rounded-xl font-medium transition-all duration-200"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                      Delete Member Completely
                     </button>
                   </div>
                 ) : (
